@@ -1,3 +1,1 @@
-$(function () {
-  console.log('DOM is ready. Write some jQuery or whatever...')
-})
+console.log("DOM is ready. Write your awesome javascript...");
