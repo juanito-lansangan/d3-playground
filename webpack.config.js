@@ -1,40 +1,34 @@
-const path = require('path')
-const webpack = require('webpack')
-const minJSON = require('jsonminify')
+const path = require("path");
+const webpack = require("webpack");
+const minJSON = require("jsonminify");
 
 const plugins = {
-  progress: require('webpackbar'),
-  clean: require('clean-webpack-plugin'),
-  extractCSS: require('mini-css-extract-plugin'),
+  progress: require("webpackbar"),
+  clean: require("clean-webpack-plugin"),
+  extractCSS: require("mini-css-extract-plugin"),
   // extractText: require('extract-text-webpack-plugin'),
-  sync: require('browser-sync-webpack-plugin'),
-  html: require('html-webpack-plugin'),
-  copy: require('copy-webpack-plugin'),
-  sri: require('webpack-subresource-integrity')
-}
+  sync: require("browser-sync-webpack-plugin"),
+  html: require("html-webpack-plugin"),
+  copy: require("copy-webpack-plugin"),
+  sri: require("webpack-subresource-integrity")
+};
 
 module.exports = (env = {}, argv) => {
-  const isProduction = argv.mode === 'production'
+  const isProduction = argv.mode === "production";
 
   let config = {
-    context: path.resolve(__dirname, 'src'),
+    context: path.resolve(__dirname, "src"),
 
     entry: {
-      vendor: [
-        './styles/vendor.scss',
-        './scripts/vendor.js'
-      ],
-      app: [
-        './styles/app.scss',
-        './scripts/app.js'
-      ]
+      vendor: ["./styles/vendor.scss", "./scripts/vendor.js"],
+      app: ["./styles/app.scss", "./scripts/app.js"]
     },
 
     output: {
-      path: path.resolve(__dirname, 'dist'),
-      publicPath: '',
-      filename: 'scripts/[name].js',
-      crossOriginLoading: 'anonymous'
+      path: path.resolve(__dirname, "dist"),
+      publicPath: "",
+      filename: "scripts/[name].js",
+      crossOriginLoading: "anonymous"
     },
 
     module: {
@@ -44,33 +38,38 @@ module.exports = (env = {}, argv) => {
           use: [
             plugins.extractCSS.loader,
             {
-              loader: 'css-loader',
+              loader: "css-loader",
               options: {
-                sourceMap: ! isProduction
+                sourceMap: !isProduction
               }
             },
             {
-              loader: 'postcss-loader',
+              loader: "postcss-loader",
               options: {
-                ident: 'postcss',
-                sourceMap: ! isProduction,
+                ident: "postcss",
+                sourceMap: !isProduction,
                 plugins: (() => {
-                  return isProduction ? [
-                    require('autoprefixer')(),
-                    require('cssnano')({
-                      preset: ['default', {
-                        minifySelectors: false
-                      }]
-                    })
-                  ] : []
+                  return isProduction
+                    ? [
+                        require("autoprefixer")(),
+                        require("cssnano")({
+                          preset: [
+                            "default",
+                            {
+                              minifySelectors: false
+                            }
+                          ]
+                        })
+                      ]
+                    : [];
                 })()
               }
             },
             {
-              loader: 'sass-loader',
+              loader: "sass-loader",
               options: {
-                outputStyle: 'expanded',
-                sourceMap: ! isProduction
+                outputStyle: "expanded",
+                sourceMap: !isProduction
               }
             }
           ]
@@ -79,11 +78,9 @@ module.exports = (env = {}, argv) => {
           test: /\.js$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
-              presets: [
-                '@babel/preset-env'
-              ]
+              presets: ["@babel/preset-env"]
             }
           }
         },
@@ -92,16 +89,16 @@ module.exports = (env = {}, argv) => {
           exclude: /fonts/,
           use: [
             {
-              loader: 'file-loader',
+              loader: "file-loader",
               options: {
-                name: '[path][name].[ext]',
-                publicPath: '..' // use relative urls
+                name: "[path][name].[ext]",
+                publicPath: ".." // use relative urls
               }
             },
             {
-              loader: 'image-webpack-loader',
+              loader: "image-webpack-loader",
               options: {
-                bypassOnDebug: ! isProduction,
+                bypassOnDebug: !isProduction,
                 mozjpeg: {
                   progressive: true,
                   quality: 65
@@ -110,7 +107,7 @@ module.exports = (env = {}, argv) => {
                   enabled: false
                 },
                 pngquant: {
-                  quality: '65-90',
+                  quality: "65-90",
                   speed: 4
                 },
                 gifsicle: {
@@ -123,19 +120,35 @@ module.exports = (env = {}, argv) => {
         {
           test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
           exclude: /images/,
-          use: [{
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'fonts/',
-              publicPath: '../fonts/' // use relative urls
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]",
+                outputPath: "fonts/",
+                publicPath: "../fonts/" // use relative urls
+              }
             }
-          }]
+          ]
+        },
+        {
+          test: /.tsv$/,
+          exclude: /images/,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]",
+                outputPath: "data/",
+                publicPath: "../" // use relative urls
+              }
+            }
+          ]
         },
         {
           test: /\.html$/,
           use: {
-            loader: 'html-loader',
+            loader: "html-loader",
             options: {
               minimize: true,
               removeComments: true,
@@ -143,88 +156,88 @@ module.exports = (env = {}, argv) => {
               removeScriptTypeAttributes: true,
               removeStyleTypeAttributes: true
             }
-          },
+          }
         }
       ]
     },
 
     devServer: {
-      contentBase: path.join(__dirname, 'src'),
+      contentBase: path.join(__dirname, "src"),
       port: 8080,
       overlay: {
         warnings: true,
         errors: true
       },
-      quiet: true,
+      quiet: true
       // open: true
     },
 
     plugins: (() => {
       let common = [
         new plugins.extractCSS({
-          filename: 'styles/[name].css'
+          filename: "styles/[name].css"
         }),
         new plugins.html({
-          template: 'index.html',
-          filename: 'index.html',
+          template: "index.html",
+          filename: "index.html",
           minify: {
             removeScriptTypeAttributes: true,
             removeStyleLinkTypeAttributes: true
           }
         }),
         new plugins.progress({
-          color: '#5C95EE'
+          color: "#5C95EE"
         })
-      ]
+      ];
 
       const production = [
-        new plugins.clean(['dist']),
+        new plugins.clean(["dist"]),
         new plugins.copy([
           {
-            from: 'data/**/*.json',
+            from: "data/**/*.json",
             // to: '',
             transform: content => {
-              return minJSON(content.toString())
+              return minJSON(content.toString());
             }
           }
         ]),
         new plugins.sri({
-          hashFuncNames: ['sha384'],
+          hashFuncNames: ["sha384"],
           enabled: true
         })
-      ]
+      ];
 
       const development = [
         new plugins.sync(
           {
-            host: 'localhost',
+            host: "localhost",
             port: 9090,
-            proxy: 'http://localhost:8080/'
+            proxy: "http://localhost:8080/"
           },
           {
             reload: false
           }
         )
-      ]
+      ];
 
       return isProduction
         ? common.concat(production)
-        : common.concat(development)
+        : common.concat(development);
     })(),
 
     devtool: (() => {
       return isProduction
-        ? '' // 'hidden-source-map'
-        : 'source-map'
+        ? "" // 'hidden-source-map'
+        : "source-map";
     })(),
 
     resolve: {
-      modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+      modules: [path.resolve(__dirname, "src"), "node_modules"],
       alias: {
-        '~': path.resolve(__dirname, 'src/scripts/')
+        "~": path.resolve(__dirname, "src/scripts/")
       }
     }
-  }
+  };
 
-  return config
+  return config;
 };

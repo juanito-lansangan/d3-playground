@@ -16,39 +16,55 @@ export default class Chart {
     const width = 420;
     const barHeight = 20;
 
-    const x = d3
-      .scaleLinear()
-      .domain([0, d3.max(data)])
-      .range([0, width]);
+    const x = d3.scaleLinear().range([0, width]);
 
-    const chart = d3
-      .select(".chart")
-      .attr("width", width)
-      .attr("height", barHeight * data.length);
+    const chart = d3.select(".chart").attr("width", width);
+    // .attr("height", barHeight * data.length);
 
-    const bar = chart
-      .selectAll("g")
-      .data(data)
-      .enter()
-      .append("g")
-      .attr("transform", function(d, i) {
-        return `translate(0, ${i * barHeight})`;
-      });
+    d3.tsv("/data/data.tsv", this.type).then(data => {
+      console.log(data);
+      x.domain([
+        0,
+        d3.max(data, function(d) {
+          return d.value;
+        })
+      ]);
 
-    bar
-      .append("rect")
-      .attr("width", x)
-      .attr("height", barHeight - 1);
+      const bar = chart
+        .selectAll("g")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("transform", function(d, i) {
+          console.log(d, i);
+          return `translate(0, ${i * barHeight})`;
+        });
+      // console.log(x);
+      bar
+        .append("rect")
+        .attr("width", function(d) {
+          return x(d.value);
+        })
+        .attr("height", barHeight - 1);
 
-    bar
-      .append("text")
-      .attr("x", function(d) {
-        return x(d) - 3;
-      })
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .text(function(d) {
-        return d;
-      });
+      bar
+        .append("text")
+        .attr("x", function(d) {
+          console.log("====================================");
+          console.log(d);
+          console.log("====================================");
+          return x(d.value) - 3;
+        })
+        .attr("y", barHeight / 2)
+        .attr("dy", ".35em")
+        .text(function(d) {
+          return d.value;
+        });
+    });
+  }
+
+  type(d) {
+    d.value = +d.value; // coerce to number
+    return d;
   }
 }
