@@ -38,7 +38,9 @@
     "webpack-subresource-integrity": "^1.1.0-rc.4",
     "webpackbar": "^2.6.3"
   },
-  "dependencies": {},
+  "dependencies": {
+    "d3": "^5.7.0"
+  },
   "main": "index.js",
   "repository": "https://github.com/dvlden/webpack-config.git"
 }
