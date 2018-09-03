@@ -78,7 +78,7 @@ export default class Chart {
         .attr("dy", "0.71em")
         .attr("text-anchor", "end")
         .attr("fill", "#5D6971")
-        .text("Score Points");
+        .text("Mobile Legends Rank Points");
 
       g.selectAll(".bar")
         .data(data)
