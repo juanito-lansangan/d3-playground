@@ -1,9 +1,8 @@
 import * as d3 from "d3";
 
-export default class Chart {
+export default class SingleBarChart {
   constructor(el) {
     console.log(el);
-    // this.div = null;
     this.init();
   }
 
