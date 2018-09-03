@@ -1,6 +1,6 @@
 # D3 JS Playground
 
-Learning the d3 js library to do the following goals from scratch.
+Learning the d3 js library to create a data visualization graph from scratch.
 
 # Goals
 
