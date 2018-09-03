@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-export default class SingleBarChart {
+export default class SingleLineChart {
   constructor(el) {
     console.log(el);
     this.init();
@@ -8,20 +8,29 @@ export default class SingleBarChart {
 
   init() {
     console.log("initializing Chart script...");
-    this.drawBarChart();
+    this.drawLineChart();
   }
 
-  drawBarChart() {
+  drawLineChart() {
     const svg = d3.select("svg"),
       margin = { top: 20, right: 20, bottom: 30, left: 50 },
       width = +svg.attr("width") - margin.left - margin.right,
       height = +svg.attr("height") - margin.top - margin.bottom;
 
-    const x = d3
-      .scaleBand()
-      .rangeRound([10, width])
-      .padding(0.1);
+    // const x = d3
+    //   .scaleBand()
+    //   .rangeRound([10, width])
+    //   .padding(0.1);
+
+    // const y = d3.scaleLinear().rangeRound([height, 0]);
+    const g = svg
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    const x = d3.scaleTime().rangeRound([0, width]);
+
     const y = d3.scaleLinear().rangeRound([height, 0]);
+    const parseTime = d3.timeParse("%d-%b-%y");
 
     // tooltips
     const div = d3
@@ -30,77 +39,65 @@ export default class SingleBarChart {
       .attr("class", "tooltip")
       .style("display", "none");
 
-    const g = svg
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    const line = d3
+      .line()
+      .x(function(d) {
+        return x(d.date);
+      })
+      .y(function(d) {
+        return y(d.close);
+      });
 
-    d3.tsv("/data/ml-data.tsv", function(d) {
-      d.points = +d.points;
+    d3.tsv("/data/data.tsv", function(d) {
+      d.date = parseTime(d.date);
+      d.close = +d.close;
       return d;
     }).then((data, error) => {
       if (error) throw error;
 
       x.domain(
-        data.map(function(d) {
-          return d.name;
+        d3.extent(data, function(d) {
+          return d.date;
         })
       );
-      y.domain([
-        0,
-        d3.max(data, function(d) {
-          return d.points;
+      y.domain(
+        d3.extent(data, function(d) {
+          return d.close;
         })
-      ]);
+      );
 
       g.append("g")
         .attr("class", "axis axis--x")
-        // .attr("transform", "translate(0," + height + ")")
-        // add margin top space on the names
         .attr("transform", `translate(0, ${height + 5})`)
         .call(d3.axisBottom(x));
 
       g.append("g")
         .attr("class", "axis axis--y")
-        // .call(d3.axisLeft(y).ticks(10, "%"))
-        // .call(
-        //   d3
-        //     .axisLeft(y)
-        //     .ticks(5)
-        //     .tickFormat(function(d) {
-        //       return `${parseInt(d / 1000)} K`;
-        //     })
-        // )
         .call(d3.axisLeft(y))
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("dy", "0.71em")
         .attr("text-anchor", "end")
-        .attr("fill", "#5D6971")
+        .attr("fill", "#000")
         .attr("class", "data-label")
-        .text("Mobile Legends Rank Points");
+        .text("Price ($)");
 
-      g.selectAll(".bar")
-        .data(data)
-        .enter()
-        .append("rect")
-        .attr("class", "bar")
-        .attr("x", function(d) {
-          return x(d.name);
-        })
-        .attr("y", function(d) {
-          return y(d.points);
-        })
-        .attr("width", x.bandwidth())
-        .attr("height", function(d) {
-          return height - y(d.points);
-        })
+      g.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 1.5)
+        .attr("d", line)
         .on("mouseover", function(d) {
           div.style("display", "inline");
         })
         .on("mousemove", function(d) {
+          console.log(d);
           div
-            .html(`${d.name} <hr/> ${d3.format("~s")(d.points)}`)
+            .html(`${d.date} <hr/> ${d.close}`)
             .style("left", d3.event.pageX - 34 + "px")
             .style("top", d3.event.pageY - 12 + "px");
         })
@@ -108,10 +105,5 @@ export default class SingleBarChart {
           div.style("display", "none");
         });
     });
-  }
-
-  type(d) {
-    d.value = +d.value; // coerce to number
-    return d;
   }
 }
